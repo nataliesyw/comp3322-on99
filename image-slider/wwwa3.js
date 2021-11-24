@@ -1,6 +1,6 @@
 const imageFolder = "images/";
 const fps = 60;
-let timeout;
+let timeouts = [];
 const scaleToFit = (img, canvas, ctx) => {
     // get the scale
     let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
@@ -41,13 +41,13 @@ window.addEventListener('DOMContentLoaded', () => {
             console.log("imageLoaded: ", imageLoaded);
             if(imageLoaded === images.length){
                 console.log("loaded all");
-                transitionImage();
+                timeouts = transitionImage();
             }
         }
         imageObjs.push(image);
     }
     const transitionImage =() => {
-        timeout = setTimeout(function animate() {
+        timeouts[timeouts.length] = setTimeout(function animate() {
             window.requestAnimationFrame(transitionImage);
             let image = imageObjs[imageIndex];
             let scale = Math.min(canvas.width / image.width, canvas.height / image.height);
@@ -64,15 +64,23 @@ window.addEventListener('DOMContentLoaded', () => {
                 imageIndex++;
                 if(imageIndex>=images.length){
                     imageIndex=0;
-                    timeout = null;
                 }
             }
         }, 3000/fps);
+        return timeouts;
     };
+    function stopCheck(timeouts) {
+        for (let i = 0; i < timeouts.length; i++) {
+            clearTimeout(timeouts[i]);
+        }
+    }
+
     canvas.addEventListener("mouseenter", function () {
-        clearTimeout(timeout);
+        console.log("enter");
+        stopCheck(timeouts);
     });
     canvas.addEventListener("mouseleave", function () {
+        console.log("leave");
         transitionImage();
     });
 });
