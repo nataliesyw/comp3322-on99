@@ -1,5 +1,6 @@
 const imageFolder = "images/";
 const fps = 60;
+let timeout;
 const scaleToFit = (img, canvas, ctx) => {
     // get the scale
     let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
@@ -10,6 +11,7 @@ const scaleToFit = (img, canvas, ctx) => {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+
     for (let i = 0; i < images.length; i++) {
         images[i] = imageFolder + images[i]
     }
@@ -45,20 +47,14 @@ window.addEventListener('DOMContentLoaded', () => {
         imageObjs.push(image);
     }
     const transitionImage =() => {
-        setTimeout(function () {
+        timeout = setTimeout(function animate() {
             window.requestAnimationFrame(transitionImage);
             let image = imageObjs[imageIndex];
-            console.log("imageIndex: ",imageIndex);
-            // get the scale
-            console.log("image.width: ", image.width);
-            console.log("image.height: ", image.height);
             let scale = Math.min(canvas.width / image.width, canvas.height / image.height);
-            console.log(scale);
-            // get the top left position of the image
             let x = (canvas.width / 2) - (image.width / 2) * scale * transitionCounter;
             let y = (canvas.height / 2) - (image.height / 2) * scale;
             context.globalAlpha = transitionCounter;
-            context.clearRect(0,0,canvas.width,canvas.height);
+            context.clearRect( 0,0,canvas.width,canvas.height);
             // context.drawImage(image,x,y);
             context.fillStyle = 'white';
             context.drawImage(image, x, y, image.width * scale, image.height * scale);
@@ -66,12 +62,17 @@ window.addEventListener('DOMContentLoaded', () => {
             if(transitionCounter>=1.00){
                 transitionCounter=0.00;
                 imageIndex++;
-                console.log("after added imageIndex: ",imageIndex);
                 if(imageIndex>=images.length){
-
                     imageIndex=0;
+                    timeout = null;
                 }
             }
-        }, 1000/fps);
-    }
+        }, 3000/fps);
+    };
+    canvas.addEventListener("mouseenter", function () {
+        clearTimeout(timeout);
+    });
+    canvas.addEventListener("mouseleave", function () {
+        transitionImage();
+    });
 });
